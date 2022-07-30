@@ -1018,55 +1018,55 @@ int nat25_db_handle(_adapter *priv, struct sk_buff *skb, int method)
 	// 	}
 
 		/*   AARP  */
-		else if (ea != NULL) {
-			/* Sanity check fields. */
-			if (ea->hw_len != ETH_ALEN || ea->pa_len != AARP_PA_ALEN) {
-				DEBUG_WARN("NAT25: Appletalk AARP Sanity check fail!\n");
-				return -1;
-			}
+		// else if (ea != NULL) {
+		// 	/* Sanity check fields. */
+		// 	if (ea->hw_len != ETH_ALEN || ea->pa_len != AARP_PA_ALEN) {
+		// 		DEBUG_WARN("NAT25: Appletalk AARP Sanity check fail!\n");
+		// 		return -1;
+		// 	}
 
-			switch (method) {
-			case NAT25_CHECK:
-				return 0;
+		// 	switch (method) {
+		// 	case NAT25_CHECK:
+		// 		return 0;
 
-			case NAT25_INSERT: {
-				/* change to AARP source mac address to wlan STA address */
-				memcpy(ea->hw_src, GET_MY_HWADDR(priv), ETH_ALEN);
+		// 	case NAT25_INSERT: {
+		// 		/* change to AARP source mac address to wlan STA address */
+		// 		memcpy(ea->hw_src, GET_MY_HWADDR(priv), ETH_ALEN);
 
-				RTW_INFO("NAT25: Insert AARP, Source=%d,%d Destination=%d,%d\n",
-					 ea->pa_src_net,
-					 ea->pa_src_node,
-					 ea->pa_dst_net,
-					 ea->pa_dst_node);
+		// 		RTW_INFO("NAT25: Insert AARP, Source=%d,%d Destination=%d,%d\n",
+		// 			 ea->pa_src_net,
+		// 			 ea->pa_src_node,
+		// 			 ea->pa_dst_net,
+		// 			 ea->pa_dst_node);
 
-				__nat25_generate_apple_network_addr(networkAddr, &ea->pa_src_net, &ea->pa_src_node);
+		// 		__nat25_generate_apple_network_addr(networkAddr, &ea->pa_src_net, &ea->pa_src_node);
 
-				__nat25_db_network_insert(priv, skb->data + ETH_ALEN, networkAddr);
+		// 		__nat25_db_network_insert(priv, skb->data + ETH_ALEN, networkAddr);
 
-				__nat25_db_print(priv);
-			}
-			return 0;
+		// 		__nat25_db_print(priv);
+		// 	}
+		// 	return 0;
 
-			case NAT25_LOOKUP: {
-				RTW_INFO("NAT25: Lookup AARP, Source=%d,%d Destination=%d,%d\n",
-					 ea->pa_src_net,
-					 ea->pa_src_node,
-					 ea->pa_dst_net,
-					 ea->pa_dst_node);
+		// 	case NAT25_LOOKUP: {
+		// 		RTW_INFO("NAT25: Lookup AARP, Source=%d,%d Destination=%d,%d\n",
+		// 			 ea->pa_src_net,
+		// 			 ea->pa_src_node,
+		// 			 ea->pa_dst_net,
+		// 			 ea->pa_dst_node);
 
-				__nat25_generate_apple_network_addr(networkAddr, &ea->pa_dst_net, &ea->pa_dst_node);
+		// 		__nat25_generate_apple_network_addr(networkAddr, &ea->pa_dst_net, &ea->pa_dst_node);
 
-				__nat25_db_network_lookup_and_replace(priv, skb, networkAddr);
+		// 		__nat25_db_network_lookup_and_replace(priv, skb, networkAddr);
 
-				/* change to AARP destination mac address to Lookup result */
-				memcpy(ea->hw_dst, skb->data, ETH_ALEN);
-			}
-			return 0;
+		// 		/* change to AARP destination mac address to Lookup result */
+		// 		memcpy(ea->hw_dst, skb->data, ETH_ALEN);
+		// 	}
+		// 	return 0;
 
-			default:
-				return -1;
-			}
-		}
+		// 	default:
+		// 		return -1;
+		// 	}
+		// }
 
 		/*   DDP  */
 		else if (ddp != NULL) {
