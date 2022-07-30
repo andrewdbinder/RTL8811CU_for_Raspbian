@@ -1069,46 +1069,46 @@ int nat25_db_handle(_adapter *priv, struct sk_buff *skb, int method)
 		// }
 
 		/*   DDP  */
-		else if (ddp != NULL) {
-			switch (method) {
-			case NAT25_CHECK:
-				return -1;
+	// 	else if (ddp != NULL) {
+	// 		switch (method) {
+	// 		case NAT25_CHECK:
+	// 			return -1;
 
-			case NAT25_INSERT: {
-				RTW_INFO("NAT25: Insert DDP, Source=%d,%d Destination=%d,%d\n",
-					 ddp->deh_snet,
-					 ddp->deh_snode,
-					 ddp->deh_dnet,
-					 ddp->deh_dnode);
+	// 		case NAT25_INSERT: {
+	// 			RTW_INFO("NAT25: Insert DDP, Source=%d,%d Destination=%d,%d\n",
+	// 				 ddp->deh_snet,
+	// 				 ddp->deh_snode,
+	// 				 ddp->deh_dnet,
+	// 				 ddp->deh_dnode);
 
-				__nat25_generate_apple_network_addr(networkAddr, &ddp->deh_snet, &ddp->deh_snode);
+	// 			__nat25_generate_apple_network_addr(networkAddr, &ddp->deh_snet, &ddp->deh_snode);
 
-				__nat25_db_network_insert(priv, skb->data + ETH_ALEN, networkAddr);
+	// 			__nat25_db_network_insert(priv, skb->data + ETH_ALEN, networkAddr);
 
-				__nat25_db_print(priv);
-			}
-			return 0;
+	// 			__nat25_db_print(priv);
+	// 		}
+	// 		return 0;
 
-			case NAT25_LOOKUP: {
-				RTW_INFO("NAT25: Lookup DDP, Source=%d,%d Destination=%d,%d\n",
-					 ddp->deh_snet,
-					 ddp->deh_snode,
-					 ddp->deh_dnet,
-					 ddp->deh_dnode);
+	// 		case NAT25_LOOKUP: {
+	// 			RTW_INFO("NAT25: Lookup DDP, Source=%d,%d Destination=%d,%d\n",
+	// 				 ddp->deh_snet,
+	// 				 ddp->deh_snode,
+	// 				 ddp->deh_dnet,
+	// 				 ddp->deh_dnode);
 
-				__nat25_generate_apple_network_addr(networkAddr, &ddp->deh_dnet, &ddp->deh_dnode);
+	// 			__nat25_generate_apple_network_addr(networkAddr, &ddp->deh_dnet, &ddp->deh_dnode);
 
-				__nat25_db_network_lookup_and_replace(priv, skb, networkAddr);
-			}
-			return 0;
+	// 			__nat25_db_network_lookup_and_replace(priv, skb, networkAddr);
+	// 		}
+	// 		return 0;
 
-			default:
-				return -1;
-			}
-		}
+	// 		default:
+	// 			return -1;
+	// 		}
+	// 	}
 
-		return -1;
-	}
+	// 	return -1;
+	// }
 
 	/*---------------------------------------------------*/
 	/*                Handle PPPoE frame                */
