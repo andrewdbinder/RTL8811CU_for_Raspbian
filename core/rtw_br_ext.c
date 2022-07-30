@@ -17,7 +17,7 @@
 #ifdef __KERNEL__
 	#include <linux/if_arp.h>
 	#include <net/ip.h>
-	#include <net/ipx.h>
+	// #include <net/ipx.h>
 	#include <linux/atalk.h>
 	#include <linux/udp.h>
 	#include <linux/if_pppox.h>
@@ -168,7 +168,7 @@ static __inline__ void __nat25_generate_ipv4_network_addr(unsigned char *network
 	memcpy(networkAddr + 7, (unsigned char *)ipAddr, 4);
 }
 
-
+/*
 static __inline__ void __nat25_generate_ipx_network_addr_with_node(unsigned char *networkAddr,
 		unsigned int *ipxNetAddr, unsigned char *ipxNodeAddr)
 {
@@ -189,7 +189,7 @@ static __inline__ void __nat25_generate_ipx_network_addr_with_socket(unsigned ch
 	memcpy(networkAddr + 1, (unsigned char *)ipxNetAddr, 4);
 	memcpy(networkAddr + 5, (unsigned char *)ipxSocketAddr, 2);
 }
-
+*/
 
 static __inline__ void __nat25_generate_apple_network_addr(unsigned char *networkAddr,
 		unsigned short *network, unsigned char *node)
@@ -892,130 +892,130 @@ int nat25_db_handle(_adapter *priv, struct sk_buff *skb, int method)
 	/*---------------------------------------------------*/
 	/*         Handle IPX and Apple Talk frame          */
 	/*---------------------------------------------------*/
-	else if ((protocol == __constant_htons(ETH_P_IPX)) ||
-		 (protocol == __constant_htons(ETH_P_ATALK)) ||
-		 (protocol == __constant_htons(ETH_P_AARP))) {
-		unsigned char ipx_header[2] = {0xFF, 0xFF};
-		struct ipxhdr	*ipx = NULL;
-		struct elapaarp	*ea = NULL;
-		struct ddpehdr	*ddp = NULL;
-		unsigned char *framePtr = skb->data + ETH_HLEN;
+	// else if ((protocol == __constant_htons(ETH_P_IPX)) ||
+	// 	 (protocol == __constant_htons(ETH_P_ATALK)) ||
+	// 	 (protocol == __constant_htons(ETH_P_AARP))) {
+	// 	unsigned char ipx_header[2] = {0xFF, 0xFF};
+	// 	struct ipxhdr	*ipx = NULL;
+	// 	struct elapaarp	*ea = NULL;
+	// 	struct ddpehdr	*ddp = NULL;
+	// 	unsigned char *framePtr = skb->data + ETH_HLEN;
 
-		if (protocol == __constant_htons(ETH_P_IPX)) {
-			RTW_INFO("NAT25: Protocol=IPX (Ethernet II)\n");
-			ipx = (struct ipxhdr *)framePtr;
-		} else { /* if(protocol <= __constant_htons(ETH_FRAME_LEN)) */
-			if (!memcmp(ipx_header, framePtr, 2)) {
-				RTW_INFO("NAT25: Protocol=IPX (Ethernet 802.3)\n");
-				ipx = (struct ipxhdr *)framePtr;
-			} else {
-				unsigned char ipx_8022_type =  0xE0;
-				unsigned char snap_8022_type = 0xAA;
+	// 	if (protocol == __constant_htons(ETH_P_IPX)) {
+	// 		RTW_INFO("NAT25: Protocol=IPX (Ethernet II)\n");
+	// 		ipx = (struct ipxhdr *)framePtr;
+	// 	} else { /* if(protocol <= __constant_htons(ETH_FRAME_LEN)) */
+	// 		if (!memcmp(ipx_header, framePtr, 2)) {
+	// 			RTW_INFO("NAT25: Protocol=IPX (Ethernet 802.3)\n");
+	// 			ipx = (struct ipxhdr *)framePtr;
+	// 		} else {
+	// 			unsigned char ipx_8022_type =  0xE0;
+	// 			unsigned char snap_8022_type = 0xAA;
 
-				if (*framePtr == snap_8022_type) {
-					unsigned char ipx_snap_id[5] = {0x0, 0x0, 0x0, 0x81, 0x37};		/* IPX SNAP ID */
-					unsigned char aarp_snap_id[5] = {0x00, 0x00, 0x00, 0x80, 0xF3};	/* Apple Talk AARP SNAP ID */
-					unsigned char ddp_snap_id[5] = {0x08, 0x00, 0x07, 0x80, 0x9B};	/* Apple Talk DDP SNAP ID */
+	// 			if (*framePtr == snap_8022_type) {
+	// 				unsigned char ipx_snap_id[5] = {0x0, 0x0, 0x0, 0x81, 0x37};		/* IPX SNAP ID */
+	// 				unsigned char aarp_snap_id[5] = {0x00, 0x00, 0x00, 0x80, 0xF3};	/* Apple Talk AARP SNAP ID */
+	// 				unsigned char ddp_snap_id[5] = {0x08, 0x00, 0x07, 0x80, 0x9B};	/* Apple Talk DDP SNAP ID */
 
-					framePtr += 3;	/* eliminate the 802.2 header */
+	// 				framePtr += 3;	/* eliminate the 802.2 header */
 
-					if (!memcmp(ipx_snap_id, framePtr, 5)) {
-						framePtr += 5;	/* eliminate the SNAP header */
+	// 				if (!memcmp(ipx_snap_id, framePtr, 5)) {
+	// 					framePtr += 5;	/* eliminate the SNAP header */
 
-						RTW_INFO("NAT25: Protocol=IPX (Ethernet SNAP)\n");
-						ipx = (struct ipxhdr *)framePtr;
-					} else if (!memcmp(aarp_snap_id, framePtr, 5)) {
-						framePtr += 5;	/* eliminate the SNAP header */
+	// 					RTW_INFO("NAT25: Protocol=IPX (Ethernet SNAP)\n");
+	// 					ipx = (struct ipxhdr *)framePtr;
+	// 				} else if (!memcmp(aarp_snap_id, framePtr, 5)) {
+	// 					framePtr += 5;	/* eliminate the SNAP header */
 
-						ea = (struct elapaarp *)framePtr;
-					} else if (!memcmp(ddp_snap_id, framePtr, 5)) {
-						framePtr += 5;	/* eliminate the SNAP header */
+	// 					ea = (struct elapaarp *)framePtr;
+	// 				} else if (!memcmp(ddp_snap_id, framePtr, 5)) {
+	// 					framePtr += 5;	/* eliminate the SNAP header */
 
-						ddp = (struct ddpehdr *)framePtr;
-					} else {
-						DEBUG_WARN("NAT25: Protocol=Ethernet SNAP %02x%02x%02x%02x%02x\n", framePtr[0],
-							framePtr[1], framePtr[2], framePtr[3], framePtr[4]);
-						return -1;
-					}
-				} else if (*framePtr == ipx_8022_type) {
-					framePtr += 3;	/* eliminate the 802.2 header */
+	// 					ddp = (struct ddpehdr *)framePtr;
+	// 				} else {
+	// 					DEBUG_WARN("NAT25: Protocol=Ethernet SNAP %02x%02x%02x%02x%02x\n", framePtr[0],
+	// 						framePtr[1], framePtr[2], framePtr[3], framePtr[4]);
+	// 					return -1;
+	// 				}
+	// 			} else if (*framePtr == ipx_8022_type) {
+	// 				framePtr += 3;	/* eliminate the 802.2 header */
 
-					if (!memcmp(ipx_header, framePtr, 2)) {
-						RTW_INFO("NAT25: Protocol=IPX (Ethernet 802.2)\n");
-						ipx = (struct ipxhdr *)framePtr;
-					} else
-						return -1;
-				}
-			}
-		}
+	// 				if (!memcmp(ipx_header, framePtr, 2)) {
+	// 					RTW_INFO("NAT25: Protocol=IPX (Ethernet 802.2)\n");
+	// 					ipx = (struct ipxhdr *)framePtr;
+	// 				} else
+	// 					return -1;
+	// 			}
+	// 		}
+	// 	}
 
-		/*   IPX  */
-		if (ipx != NULL) {
-			switch (method) {
-			case NAT25_CHECK:
-				if (!memcmp(skb->data + ETH_ALEN, ipx->ipx_source.node, ETH_ALEN)) {
-					RTW_INFO("NAT25: Check IPX skb_copy\n");
-					return 0;
-				}
-				return -1;
+	// 	/*   IPX  */
+	// 	if (ipx != NULL) {
+	// 		switch (method) {
+	// 		case NAT25_CHECK:
+	// 			if (!memcmp(skb->data + ETH_ALEN, ipx->ipx_source.node, ETH_ALEN)) {
+	// 				RTW_INFO("NAT25: Check IPX skb_copy\n");
+	// 				return 0;
+	// 			}
+	// 			return -1;
 
-			case NAT25_INSERT: {
-				RTW_INFO("NAT25: Insert IPX, Dest=%08x,%02x%02x%02x%02x%02x%02x,%04x Source=%08x,%02x%02x%02x%02x%02x%02x,%04x\n",
-					 ipx->ipx_dest.net,
-					 ipx->ipx_dest.node[0],
-					 ipx->ipx_dest.node[1],
-					 ipx->ipx_dest.node[2],
-					 ipx->ipx_dest.node[3],
-					 ipx->ipx_dest.node[4],
-					 ipx->ipx_dest.node[5],
-					 ipx->ipx_dest.sock,
-					 ipx->ipx_source.net,
-					 ipx->ipx_source.node[0],
-					 ipx->ipx_source.node[1],
-					 ipx->ipx_source.node[2],
-					 ipx->ipx_source.node[3],
-					 ipx->ipx_source.node[4],
-					 ipx->ipx_source.node[5],
-					 ipx->ipx_source.sock);
+	// 		case NAT25_INSERT: {
+	// 			RTW_INFO("NAT25: Insert IPX, Dest=%08x,%02x%02x%02x%02x%02x%02x,%04x Source=%08x,%02x%02x%02x%02x%02x%02x,%04x\n",
+	// 				 ipx->ipx_dest.net,
+	// 				 ipx->ipx_dest.node[0],
+	// 				 ipx->ipx_dest.node[1],
+	// 				 ipx->ipx_dest.node[2],
+	// 				 ipx->ipx_dest.node[3],
+	// 				 ipx->ipx_dest.node[4],
+	// 				 ipx->ipx_dest.node[5],
+	// 				 ipx->ipx_dest.sock,
+	// 				 ipx->ipx_source.net,
+	// 				 ipx->ipx_source.node[0],
+	// 				 ipx->ipx_source.node[1],
+	// 				 ipx->ipx_source.node[2],
+	// 				 ipx->ipx_source.node[3],
+	// 				 ipx->ipx_source.node[4],
+	// 				 ipx->ipx_source.node[5],
+	// 				 ipx->ipx_source.sock);
 
-				if (!memcmp(skb->data + ETH_ALEN, ipx->ipx_source.node, ETH_ALEN)) {
-					RTW_INFO("NAT25: Use IPX Net, and Socket as network addr\n");
+	// 			if (!memcmp(skb->data + ETH_ALEN, ipx->ipx_source.node, ETH_ALEN)) {
+	// 				RTW_INFO("NAT25: Use IPX Net, and Socket as network addr\n");
 
-					__nat25_generate_ipx_network_addr_with_socket(networkAddr, &ipx->ipx_source.net, &ipx->ipx_source.sock);
+	// 				__nat25_generate_ipx_network_addr_with_socket(networkAddr, &ipx->ipx_source.net, &ipx->ipx_source.sock);
 
-					/* change IPX source node addr to wlan STA address */
-					memcpy(ipx->ipx_source.node, GET_MY_HWADDR(priv), ETH_ALEN);
-				} else
-					__nat25_generate_ipx_network_addr_with_node(networkAddr, &ipx->ipx_source.net, ipx->ipx_source.node);
+	// 				/* change IPX source node addr to wlan STA address */
+	// 				memcpy(ipx->ipx_source.node, GET_MY_HWADDR(priv), ETH_ALEN);
+	// 			} else
+	// 				__nat25_generate_ipx_network_addr_with_node(networkAddr, &ipx->ipx_source.net, ipx->ipx_source.node);
 
-				__nat25_db_network_insert(priv, skb->data + ETH_ALEN, networkAddr);
+	// 			__nat25_db_network_insert(priv, skb->data + ETH_ALEN, networkAddr);
 
-				__nat25_db_print(priv);
-			}
-			return 0;
+	// 			__nat25_db_print(priv);
+	// 		}
+	// 		return 0;
 
-			case NAT25_LOOKUP: {
-				if (!memcmp(GET_MY_HWADDR(priv), ipx->ipx_dest.node, ETH_ALEN)) {
-					RTW_INFO("NAT25: Lookup IPX, Modify Destination IPX Node addr\n");
+	// 		case NAT25_LOOKUP: {
+	// 			if (!memcmp(GET_MY_HWADDR(priv), ipx->ipx_dest.node, ETH_ALEN)) {
+	// 				RTW_INFO("NAT25: Lookup IPX, Modify Destination IPX Node addr\n");
 
-					__nat25_generate_ipx_network_addr_with_socket(networkAddr, &ipx->ipx_dest.net, &ipx->ipx_dest.sock);
+	// 				__nat25_generate_ipx_network_addr_with_socket(networkAddr, &ipx->ipx_dest.net, &ipx->ipx_dest.sock);
 
-					__nat25_db_network_lookup_and_replace(priv, skb, networkAddr);
+	// 				__nat25_db_network_lookup_and_replace(priv, skb, networkAddr);
 
-					/* replace IPX destination node addr with Lookup destination MAC addr */
-					memcpy(ipx->ipx_dest.node, skb->data, ETH_ALEN);
-				} else {
-					__nat25_generate_ipx_network_addr_with_node(networkAddr, &ipx->ipx_dest.net, ipx->ipx_dest.node);
+	// 				/* replace IPX destination node addr with Lookup destination MAC addr */
+	// 				memcpy(ipx->ipx_dest.node, skb->data, ETH_ALEN);
+	// 			} else {
+	// 				__nat25_generate_ipx_network_addr_with_node(networkAddr, &ipx->ipx_dest.net, ipx->ipx_dest.node);
 
-					__nat25_db_network_lookup_and_replace(priv, skb, networkAddr);
-				}
-			}
-			return 0;
+	// 				__nat25_db_network_lookup_and_replace(priv, skb, networkAddr);
+	// 			}
+	// 		}
+	// 		return 0;
 
-			default:
-				return -1;
-			}
-		}
+	// 		default:
+	// 			return -1;
+	// 		}
+	// 	}
 
 		/*   AARP  */
 		else if (ea != NULL) {
